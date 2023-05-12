@@ -3,7 +3,10 @@
   let todos = ref([])
   let input = ref([''])
   function a() {
-    todos.value.push(input.value)
+    todos.value.push({
+      text: input.value,
+      complete: false
+    })
     input.value = ''
   }
   function deleted(index) {
@@ -13,13 +16,13 @@
 
 <template>
   <h1>My todo</h1>
-  <ul>
-  <li v-for="(todos, index) in todos"> 
-    {{ index }}
-    {{ todos }} 
+  <ol>
+  <li v-for="(todos, index) in todos">
+    <input type="checkbox" v-model="todos.complete">
+    {{ todos.text }} 
     <button @click="deleted(index)">X</button>
   </li>
-  </ul>
+  </ol>
   <br>
   <input v-model="input" @keydown.enter="a">
   <button @click="a()">Add Todo</button>
@@ -34,7 +37,7 @@
     font-family: 'Nunito', sans-serif;
     text-align: center;
   }
-  ul {
+  ol {
     text-align: center;
     display: inline-block;
   }
