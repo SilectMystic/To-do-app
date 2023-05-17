@@ -2,6 +2,7 @@
   import {ref, watch} from 'vue';
   let todos = ref(JSON.parse(window.localStorage.getItem('todos'))?? [])
   let input = ref([''])
+  let filter = ref([])
   watch(todos, function(value) {
       window.localStorage.setItem('todos', JSON.stringify(value))
     }, {deep: true})
@@ -16,12 +17,33 @@
   function deleted(index) {
     todos.value.splice(index, 1)
   }
+  function todosFilter(todos) {
+    if(filter.value == "active" ){
+      return todos.complete == false
+     } else if (filter.value == 'inactive'){
+      return todos.complete == true
+     }
+      else{
+        return true
+      }
+     }
+    
 </script>
 
 <template>
   <h1>My todo</h1>
+  <br>
+  <input type="radio" name="filter" value="all" v-model="filter">
+  <label>All</label>
+  &nbsp;
+  <input type="radio" name="filter" value="active" v-model="filter">
+  <label>Active</label>
+  &nbsp;
+  <input type="radio" name="filter" value="inactive" v-model="filter">
+  <label>Complete</label>
+  <br>
   <ol>
-  <li v-for="(todos, index) in todos" :class="{complete: todos.complete}">
+  <li v-for="(todos, index) in todos.filter(todosFilter)" :class="{complete: todos.complete}">
     <input type="checkbox" v-model="todos.complete">
     {{ todos.text }} 
     <button class="deleted" @click="deleted(index)">X</button>
@@ -55,7 +77,7 @@
   .deleted {
     display: none;
   }
-  .deleted:hover {
+  li:hover > .deleted {
     display: inline-block;
   }
   input[type="checkbox"] {
@@ -66,13 +88,11 @@
     cursor: pointer;
     -webkit-appearance: none;
   }
-  input[type="checkbox"]::after {
-    background-color: white;
-    color: black;
-    font-family: 'Nunito', sans-serif;
-    -webkit-appearance: none;
-    height: 100px;
-    width: 50px;
+  input[type="checkbox"]:after {
+    background-color: aliceblue;
+    padding: 100px;
+    -webkit-appearance: button;
+
   }
   #submit {
     cursor: pointer;
