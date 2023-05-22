@@ -3,23 +3,32 @@
   let todos = ref(JSON.parse(window.localStorage.getItem('todos'))?? [])
   let input = ref([''])
   let filter = ref([])
-  let filCom = ref([filter.value == 'inactive'])
   watch(todos, function(value) {
       window.localStorage.setItem('todos', JSON.stringify(value))
     }, {deep: true})
   function a() {
-    todos.value.push({
+    if (input.value == ""){
+      console.log("nothing")
+    }
+    else{
+      todos.value.push({
       text: input.value,
       complete: false
     })
     input.value = ''
     window.localStorage.setItem('todos', todos.value)
+    }
   }
   function deleted(index) {
     todos.value.splice(index, 1)
   }
-  function clearDel() {
-    filCom.delete()
+  function clearDel(todos) {
+    if (todos.complete != 'inactive'){
+      todos.complete=todos.complete.filter(todos.complete=true)
+    }
+    else{
+      console.log('no we')
+    }
   }
   function todosFilter(todos) {
     if(filter.value == "active" ){
@@ -37,43 +46,64 @@
 </script>
 
 <template>
-  <head>
-    
-  </head>
-  <h1>My todo</h1>
-  <br>
-  <div v-if="todos.length > 0">
-    <input type="radio" name="filter" value="all" v-model="filter">
-    <label>All</label>
-    &nbsp;
-    <input type="radio" name="filter" value="active" v-model="filter">
-    <label>Active</label>
-    &nbsp;
-    <input type="radio" name="filter" value="inactive" v-model="filter">
-    <label>Complete</label>
+  <div id="box">
+    <div id="title">
+      <h1>To-Do App</h1>
+    </div>
+    <hr>
+    <div v-if="todos.length > 0" id="filters">
+      <label class="radioCon">All
+      <input type="radio" checked="checked" name="filter" v-model="filter" value="all">
+      <span class="radioCheck"></span>
+      </label>
+      &nbsp;
+      <label class="radioCon">Active
+      <input type="radio" name="filter" v-model="filter" value="active">
+      <span class="radioCheck"></span>
+      </label>
+      &nbsp;
+      <label class="radioCon">complete
+      <input type="radio" name="filter" v-model="filter" value="inactive">
+      <span class="radioCheck"></span>
+      </label>
+    </div>
+    <div v-if="todos.length == 0" id="addTodo">
+      <p>
+        Start by adding a To-Do!
+      </p>
+    </div>
+    <div id="list" v-if="todos.length > 0">
+      <hr>
+      <ol>
+      <li v-for="(todos, index) in todos.filter(todosFilter)" :class="{complete: todos.complete}">
+        <label class="container">
+        <input type="checkbox" checked="checked" v-model="todos.complete">
+        <span class="checkmark"></span>
+        </label>
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        {{ todos.text }}
+        &nbsp; 
+        <button class="deleted" @click="deleted(index)">X</button>
+      </li>
+      </ol>
+    </div>
+    <hr>
+    <div id="input">
+      <p v-if="todos.length == 1">
+        {{ todos.filter(activeFilter).length}} Item Left
+      </p>
+      <p v-if="todos.length >= 2">
+        {{ todos.filter(activeFilter).length}} Items Left
+      </p>
+      <input v-model="input" @keydown.enter="a" placeholder="Add todo!">
+      <br> <br>
+      <button @click="a()" id="submit">Add Todo</button>
+      <br><br>
+    </div>
   </div>
-  <br>
-  <ol>
-  <li v-for="(todos, index) in todos.filter(todosFilter)" :class="{complete: todos.complete}">
-    <label class="container">
-    <input type="checkbox" checked="checked" v-model="todos.complete">
-    <span class="checkmark"></span>
-    </label>
-    &nbsp;
-    &nbsp;
-    &nbsp;
-    {{ todos.text }}
-    &nbsp; 
-    <button class="deleted" @click="deleted(index)">X</button>
-  </li>
-  </ol>
-  <br>
-  <p>
-    {{ todos.filter(activeFilter).length}} Items Left
-  </p>
-  <input v-model="input" @keydown.enter="a" placeholder="Add todo!">
-  <br> <br>
-  <button @click="a()" id="submit">Add Todo</button>
 </template>
 
 <style>
@@ -84,6 +114,10 @@
     color: white;
     font-family: 'Nunito', sans-serif;
     text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 1080px;
+    margin-top: 8%;
   }
   ol {
     text-align: center;
@@ -96,26 +130,6 @@
     text-decoration: line-through;
     color: #2e375e;
   }
-  /* .deleted {
-    display: none;
-  }
-  li:hover > .deleted {
-    display: inline-block;
-  } */
-  /* input[type="checkbox"] {
-    color: orange;
-    background-color: red;
-    height: 30px;
-    width: 30px;
-    cursor: pointer;
-    -webkit-appearance: none;
-  }
-  input[type="checkbox"]:after {
-    background-color: aliceblue;
-    padding: 100px;
-    -webkit-appearance: button;
-
-  } */
   #submit {
     cursor: pointer;
   }
@@ -148,12 +162,13 @@
   left: 0;
   height: 25px;
   width: 25px;
-  background-color: #eee;
+  background-color: #232946;
+  border-radius: 8px;
 }
 
 /* On mouse-over, add a grey background color */
 .container:hover input ~ .checkmark {
-  background-color: #ccc;
+  background-color: rgb(34, 32, 32);
 }
 
 /* When the checkbox is checked, add a blue background */
@@ -186,15 +201,16 @@
   transform: rotate(45deg);
 }
 button {
-    background-color: #b8c1ec;
+    background-color: #232946;
     padding: 5px;
     border-radius: 8px;
     text-decoration: none;
+    color: white;
 }
 
 button:hover {
     background-color: rgb(34, 32, 32);
-    color: #124aff;
+    color: #6246ea;
 }
 input {
     background-color: #040318;
@@ -211,8 +227,10 @@ input {
 input:focus {
     border: rgb(34, 32, 32) 5px solid;
 }
-.radio {
-  display: block;
+
+/* The container */
+.radioCon {
+  display: inline-block;
   position: relative;
   padding-left: 35px;
   margin-bottom: 12px;
@@ -225,54 +243,98 @@ input:focus {
 }
 
 /* Hide the browser's default radio button */
-.radio input {
+.radioCon input {
   position: absolute;
   opacity: 0;
   cursor: pointer;
-  height: 0;
-  width: 0;
 }
 
 /* Create a custom radio button */
-.radiocheck {
+.radioCheck {
   position: absolute;
   top: 0;
   left: 0;
   height: 25px;
   width: 25px;
-  background-color: #eee;
+  background-color: #232946;
   border-radius: 50%;
 }
 
 /* On mouse-over, add a grey background color */
-.radio:hover input ~ .radiocheck {
-  background-color: #ccc;
+.radioCon:hover input ~ .radioCheck {
+  background-color: rgb(34, 32, 32);
 }
 
 /* When the radio button is checked, add a blue background */
-.radio input:checked ~ .radiocheck {
+.radioCon input:checked ~ .radioCheck {
   background-color: #2196F3;
 }
 
 /* Create the indicator (the dot/circle - hidden when not checked) */
-.radiocheck:after {
+.radioCon:after {
   content: "";
   position: absolute;
   display: none;
 }
 
 /* Show the indicator (dot/circle) when checked */
-.radio input:checked ~ .radiocheck:after {
-  display: block;
+.radioCon input:checked ~ .radioCheck:after {
+  display: inline-block;
 }
 
 /* Style the indicator (dot/circle) */
-.radio .radiocheck:after {
-  top: 9px;
-  left: 9px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: white;
+.radioCon .radioCheck:after {
+ 	top: 9px;
+	left: 9px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: white;
+}
+
+#addTodo {
+  padding: 15px;
+  background-color: #151232;
+  width: 200px;
+  margin: auto;
+  border-radius: 8px;
+  margin-top: 35px;
+  margin-bottom: 28px;
+}
+#box {
+  background-color: #1b2139;
+  padding: 10px;
+  border-radius: 8px;
+}
+#title {
+  background-color: #3f4d85;
+  padding: 10px;
+  border-radius: 8px;
+}
+#filters {
+  background-color: #262f52;
+  padding: 15px;
+  border-radius: 8px;
+  padding-bottom: 5px;
+  padding-top: 18px;
+}
+hr {
+  padding: 0px;
+  margin: 2px;
+  border: #7f5af0 1px solid;
+  border-radius: 8;
+}
+#input {
+  background-color: #121629;
+  border-radius: 8px;
+  padding: 5px;
+  font-size: 18px;
+}
+#list {
+  background-color: #151232;
+  border-radius: 8px;
+}
+.deleted {
+  cursor: pointer;
 }
 </style>
