@@ -98,6 +98,9 @@
       <p v-if="todos.length >= 2">
         {{ todos.filter(activeFilter).length}} Items Left
       </p>
+      <p v-if="todos.length == 0">
+        <br>
+      </p>
       <input v-model="input" @keydown.enter="a" placeholder="Add todo!">
       <br> <br>
       <button @click="a()" id="submit">Add Todo</button>
@@ -299,7 +302,7 @@ input:focus {
   margin: auto;
   border-radius: 8px;
   margin-top: 35px;
-  margin-bottom: 28px;
+  margin-bottom: 34px;
 }
 #box {
   background-color: #1b2139;
